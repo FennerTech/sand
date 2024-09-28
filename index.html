@@ -1,0 +1,620 @@
+<!-- -----------------------------------------------
+Sand v1.15
+(c) 2024 Marco Fenner
+
+Urheberrechtlich geschützt.
+Kopieren erlaubt.
+Verändern nur mit Namensnennung des Autors ;-)
+Danke und Viel Spaß!
+------------------------------------------------ -->
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Sand v1.15</title>
+    
+    <meta name="description" content="Sand v1.15 ist ein interaktives Kunstwerkzeug vom Datenschrauber. Erstellen Sie kreative Sandbilder mit Links- und Rechtsklick.">
+    <meta name="keywords" content="Sand, Kunstwerkzeug, Datenschrauber, interaktiv, Kreativität, Sandbilder, malen, zeichnen">
+    <meta name="author" content="Marco Fenner">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Open Graph Meta-Tags -->
+    <meta property="og:title" content="Sand v1.15 - Ein Kunstwerkzeug vom Datenschrauber">
+    <meta property="og:description" content="Erstellen Sie kreative Sandbilder mit dem interaktiven Kunstwerkzeug Sand v1.15.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fennertech.github.io/sand/">   
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        body {
+            background-color: #343541;
+            color: white;
+            margin: 0;
+            overflow: hidden;
+        }
+        #statusWindow {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            border: 1px solid lightgray;
+            padding: 10px;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.1);
+            width: 300px;
+        }
+        
+        #statusWindow h1 {
+    	    font-size: 28px;
+	    margin: 0;
+	    color: lightgreen;
+	    text-align: center;
+	}
+
+	#subtitle {
+	    font-size: 14px;
+	    text-align: center;
+	    margin: 5px 0;
+	}
+
+	#subtitle a {
+	    color: lightgreen;
+	    text-decoration: none;
+	}
+        
+        #ballCount {
+            font-size: 30px;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 25px;
+        }
+        #colorPalette {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .colorOption {
+            width: 20px;
+            height: 20px;
+            margin: 2px;
+            border: 1px solid #fff;
+            cursor: pointer;
+        }
+        #colorPicker {
+            margin: 10px auto;
+            margin-bottom: 25px;
+            display: block;
+        }
+        
+	.cookie-notice {
+	    position: fixed;
+	    bottom: 0;
+ 	    left: 0;
+	    right: 0;
+	    background-color: rgba(52, 53, 65, 0.95);
+	    color: white;
+	    padding: 20px;
+ 	    text-align: center;
+	    z-index: 3000;
+	    border: 1px solid white;
+	}
+
+	.cookie-notice button {
+	    margin-top: 10px;
+	    padding: 10px 20px;
+	    background-color: lightgreen;
+	    color: black;
+	    border: none;
+	    cursor: pointer;
+	}
+        
+        #buttonRow {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        #buttonRow button {
+            padding: 10px;
+            font-size: 16px;
+	    margin: 0 5px;
+        }
+        #clearButton {
+            background-color: red;
+            color: white;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modalContent {
+            background-color: #fff;
+            padding: 20px;
+            text-align: left;
+            color: black;
+            border-radius: 5px;
+            max-height: 75%;
+            max-width: 75%;
+            overflow: auto;
+            position: relative;
+        }
+        .modalContent button {
+            margin: 10px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .modalContent h2 {
+            margin-top: 0;
+        }
+        .closeButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        a {
+            color: blue;
+        }
+        hr {
+            margin-top: 10px;
+            border: 1px solid #fff;
+            margin-bottom: 20px;
+        }
+        .visitorCounter {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .visitorCounter div {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <!-- Besucherzähler Script -->
+    <script language="JavaScript" src="https://www.besucherzaehler-kostenlos.de/js/counter.js.php?count=1&id=fennertech.github.iosand&start=0&design=6"></script>
+
+    <div id="statusWindow">
+        <h1>Sand v1.15</h1>
+        <div id="subtitle">
+            <p>Ein Kunstwerkzeug vom <a href="mailto:datenschrauber@posteo.de">Datenschrauber</a></p>
+            <p>Bitte Links- und Rechtsklick verwenden ...</p>
+        </div>
+        <div id="ballCount">0</div>
+        <div id="colorPalette">
+            <!-- Erste Reihe -->
+            <div class="colorOption" data-color="white" style="background-color: white;"></div>
+            <div class="colorOption" data-color="black" style="background-color: black;"></div>
+            <div class="colorOption" data-color="red" style="background-color: red;"></div>
+            <div class="colorOption" data-color="green" style="background-color: green;"></div>
+            <div class="colorOption" data-color="blue" style="background-color: blue;"></div>
+            <div class="colorOption" data-color="yellow" style="background-color: yellow;"></div>
+            <div class="colorOption" data-color="orange" style="background-color: orange;"></div>
+            <div class="colorOption" data-color="violet" style="background-color: violet;"></div>
+            <!-- Zweite Reihe -->
+            <div class="colorOption" data-color="brown" style="background-color: brown;"></div>
+            <div class="colorOption" data-color="pink" style="background-color: pink;"></div>
+            <div class="colorOption" data-color="cyan" style="background-color: cyan;"></div>
+            <div class="colorOption" data-color="magenta" style="background-color: magenta;"></div>
+            <div class="colorOption" data-color="lime" style="background-color: lime;"></div>
+            <div class="colorOption" data-color="gold" style="background-color: gold;"></div>
+            <div class="colorOption" data-color="silver" style="background-color: silver;"></div>
+            <div class="colorOption" data-color="navy" style="background-color: navy;"></div>
+        </div>
+        <input type="color" id="colorPicker">
+        <div id="buttonRow">
+            <button id="clearButton">Löschen</button>
+            <button id="impressumButton">Impressum</button>
+            <button id="photoButton">Foto</button>
+        </div>
+        <hr>
+        <!-- Besucherzähler -->
+        <div class="visitorCounter">
+            <div>
+                <span>Aktuell online:</span>
+                <span class="BZonline"></span>
+            </div>
+            <div>
+                <span>Besucher heute:</span>
+                <span class="BZheute"></span>
+            </div>
+            <div>
+                <span>Besucher gestern:</span>
+                <span class="BZgestern"></span>
+            </div>
+            <div>
+                <span>Besucher gesamt:</span>
+                <span class="BZgesamt"></span>
+            </div>
+            <div>
+                <span>Besucher seit:</span>
+                <span class="BZseit"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Fenster für Löschen -->
+    <div class="modal" id="modal">
+        <div class="modalContent">
+            <p>Bist du sicher, dass du den Sand löschen möchtest?</p>
+            <button id="confirmClear">Ja</button>
+            <button id="cancelClear">Nein</button>
+        </div>
+    </div>
+
+    <!-- Modal Fenster für Impressum -->
+    <div class="modal" id="impressumModal">
+        <div class="modalContent">
+            <button id="closeImpressumX" class="closeButton">&times;</button>
+            <h2>Impressum</h2>
+            <p><strong>Angaben gemäß § 5 TMG</strong></p>
+        <p><strong>Betreiber der Website:</strong><br> Marco Fenner<br> Wiardastraße 19<br> 26603 Aurich<br> Deutschland</p>
+        <p><strong>Kontakt:</strong><br> E-Mail: <a href="mailto:datenschrauber@posteo.de">datenschrauber@posteo.de</a><br> Telefon: +49 1573 004 2105</p>
+        <p><strong>Vielen Dank für den Besuch meiner Website.<br>Wenn Sie Ihnen gefallen hat, würde ich mich über eine kurze Nachricht sehr freuen.<br>Oder schickt mir doch einfach mal ein Foto von eurer Kreation! </strong> 😊</p>
+
+        <h3>Haftungsausschluss:</h3>
+        <p><strong>Haftung für Inhalte</strong><br> Als Diensteanbieter bin ich gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG bin ich als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werde ich diese Inhalte umgehend entfernen.</p>
+
+        <p><strong>Haftung für Links</strong><br> Mein Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte ich keinen Einfluss habe. Deshalb kann ich für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werde ich derartige Links umgehend entfernen.</p>
+
+        <p><strong>Urheberrecht</strong><br> Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitte ich um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werde ich diese Inhalte umgehend entfernen.</p>
+
+        <h3>Datenschutz:</h3>
+        <p>Die Nutzung meiner Webseite ist in der Regel ohne Angabe personenbezogener Daten möglich. Soweit auf meinen Seiten personenbezogene Daten (beispielsweise Name, Anschrift oder E-Mail-Adressen) erhoben werden, erfolgt dies, soweit möglich, stets auf freiwilliger Basis. Diese Daten werden ohne Ihre ausdrückliche Zustimmung nicht an Dritte weitergegeben. Ich weise darauf hin, dass die Datenübertragung im Internet (z.B. bei der Kommunikation per E-Mail) Sicherheitslücken aufweisen kann. Ein lückenloser Schutz der Daten vor dem Zugriff durch Dritte ist nicht möglich.</p>
+
+        <h3>Besucherzähler von besucherzaehler-kostenlos.de</h3>
+
+        <p>Diese Webseite verwendet einen externen Zähler, um die Anzahl der Webseitenaufrufe zu erfassen. Dafür wird ein Java-Script von einer externe Webseite geladen. Der Server von <a href="https://www.besucherzaehler-kostenlos.de">besucherzaehler-kostenlos.de</a> speichert die IP-Adresse des Zugriffs anonymisiert und zeitlich begrenzt in einer LOG-Datei ab. Diese wird regelmäßig unwiderruflich gelöscht.</p>
+
+        <p>Um die korrekte Funktionsweise des Zählers zu gewährleisten, speichert der Besucherzähler zudem einen sogenannten Session-Cookie auf dem Computer des Besuchers ab. Dieser wird in der Regel vom Browser gelöscht, sobald er geschlossen wird. In diesem Cookie werden keine persönlichen Informationen gespeichert. Er enthält lediglich die Information der aufgerufenen Domain, sowie einen boolschen Tag (true/false), um den Besucher als bereits gezählt zu markieren.</p>
+
+        <p>Es werden auch darüberhinaus keine persönlichen oder personenbezogenen Daten vom Besucherzähler erhoben. Eine Nachverfolgung oder Zuordnung der Zugriffe ist zu keiner Zeit möglich. Ein besonderer Dank geht an <a href="https://www.howtodocentral.com">www.howtodocentral.com</a>, durch dessen Unterstützung dieser kostenlose Service erst möglich gemacht wird.</p>
+
+        <h3>Einsehbarkeit des Quellcodes:</h3>
+        <p>Der Quellcode dieser Seite ist vollständig für jedermann einsehbar.</p>
+    </div>
+            <button id="closeImpressum">Schließen</button>
+        </div>
+    </div>
+
+    <canvas id="sandCanvas"></canvas>
+
+    <script>
+        let canvas = document.getElementById('sandCanvas');
+        let ctx = canvas.getContext('2d');
+
+        let sandGrainCount = 0;
+        let isMouseDown = false;
+        let isRightMouseDown = false;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        let currentColorFalling = 'white';
+        let currentColorStatic = 'white';
+
+        let lastRightMouseX = null;
+        let lastRightMouseY = null;
+
+        // Größe der Sandkörner und des Grids
+        let gridCellSize = 2;
+        let gridWidth;
+        let gridHeight;
+        let grid;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            gridWidth = Math.floor(canvas.width / gridCellSize);
+            gridHeight = Math.floor(canvas.height / gridCellSize);
+
+            grid = [];
+            for (let x = 0; x < gridWidth; x++) {
+                grid[x] = [];
+                for (let y = 0; y < gridHeight; y++) {
+                    grid[x][y] = null;
+                }
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        document.addEventListener('mousemove', function(event) {
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+
+            if (isRightMouseDown) {
+                createSandGrainLine(lastRightMouseX, lastRightMouseY, mouseX, mouseY, true);
+                lastRightMouseX = mouseX;
+                lastRightMouseY = mouseY;
+            }
+        });
+
+        document.addEventListener('mousedown', function(event) {
+            let statusWindow = document.getElementById('statusWindow');
+            let rect = statusWindow.getBoundingClientRect();
+            if (
+                event.clientX >= rect.left &&
+                event.clientX <= rect.right &&
+                event.clientY >= rect.top &&
+                event.clientY <= rect.bottom
+            ) {
+                return;
+            }
+
+            if (event.button === 0) {
+                isMouseDown = true;
+                mouseX = event.clientX;
+                mouseY = event.clientY;
+                createSandGrain(mouseX, mouseY, false);
+            } else if (event.button === 2) {
+                isRightMouseDown = true;
+                mouseX = event.clientX;
+                mouseY = event.clientY;
+                lastRightMouseX = mouseX;
+                lastRightMouseY = mouseY;
+                createSandGrain(mouseX, mouseY, true);
+                event.preventDefault();
+            }
+        });
+
+        document.addEventListener('mouseup', function(event) {
+            if (event.button === 0) {
+                isMouseDown = false;
+            } else if (event.button === 2) {
+                isRightMouseDown = false;
+                lastRightMouseX = null;
+                lastRightMouseY = null;
+            }
+        });
+
+        document.addEventListener('contextmenu', function(event) {
+            let statusWindow = document.getElementById('statusWindow');
+            let rect = statusWindow.getBoundingClientRect();
+            if (
+                event.clientX >= rect.left &&
+                event.clientX <= rect.right &&
+                event.clientY >= rect.top &&
+                event.clientY <= rect.bottom
+            ) {
+                return;
+            }
+            event.preventDefault();
+        });
+
+        const colorOptions = document.querySelectorAll('.colorOption');
+        colorOptions.forEach(option => {
+            option.addEventListener('click', function(event) {
+                currentColorFalling = this.getAttribute('data-color');
+            });
+            option.addEventListener('contextmenu', function(event) {
+                event.preventDefault();
+                currentColorStatic = this.getAttribute('data-color');
+            });
+        });
+
+        const colorPicker = document.getElementById('colorPicker');
+        colorPicker.addEventListener('input', function() {
+            currentColorFalling = this.value;
+        });
+        colorPicker.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+            currentColorStatic = this.value;
+        });
+
+        const clearButton = document.getElementById('clearButton');
+        const modal = document.getElementById('modal');
+        const confirmClear = document.getElementById('confirmClear');
+        const cancelClear = document.getElementById('cancelClear');
+
+        clearButton.addEventListener('click', function() {
+            modal.style.display = 'flex';
+        });
+
+        confirmClear.addEventListener('click', function() {
+            for (let x = 0; x < gridWidth; x++) {
+                for (let y = 0; y < gridHeight; y++) {
+                    grid[x][y] = null;
+                }
+            }
+            sandGrainCount = 0;
+            document.getElementById('ballCount').textContent = sandGrainCount.toLocaleString('de-DE');
+            modal.style.display = 'none';
+        });
+
+        cancelClear.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Impressum-Button Event Listener
+        const impressumButton = document.getElementById('impressumButton');
+        const impressumModal = document.getElementById('impressumModal');
+        const closeImpressum = document.getElementById('closeImpressum');
+        const closeImpressumX = document.getElementById('closeImpressumX');
+
+        impressumButton.addEventListener('click', function() {
+            impressumModal.style.display = 'flex';
+        });
+
+        closeImpressum.addEventListener('click', function() {
+            impressumModal.style.display = 'none';
+        });
+
+        closeImpressumX.addEventListener('click', function() {
+            impressumModal.style.display = 'none';
+        });
+
+        impressumModal.addEventListener('click', function(event) {
+            if (event.target === impressumModal) {
+                impressumModal.style.display = 'none';
+            }
+        });
+
+        // Foto-Button Event Listener
+        const photoButton = document.getElementById('photoButton');
+        photoButton.addEventListener('click', function() {
+            let tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            let tempCtx = tempCanvas.getContext('2d');
+
+            for (let x = 0; x < gridWidth; x++) {
+                for (let y = 0; y < gridHeight; y++) {
+                    if (grid[x][y] !== null) {
+                        tempCtx.fillStyle = grid[x][y].color;
+                        tempCtx.fillRect(x * gridCellSize, y * gridCellSize, gridCellSize, gridCellSize);
+                    }
+                }
+            }
+
+            let image = tempCanvas.toDataURL('image/jpeg', 1.0);
+
+            let link = document.createElement('a');
+            link.href = image;
+            link.download = 'sandkreation.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        function createSandGrain(x, y, isStatic = false) {
+            let gridX = Math.floor(x / gridCellSize);
+            let gridY = Math.floor(y / gridCellSize);
+
+            if (gridX < 0 || gridX >= gridWidth || gridY < 0 || gridY >= gridHeight) {
+                return;
+            }
+
+            if (grid[gridX][gridY] === null) {
+                let color = isStatic ? currentColorStatic : currentColorFalling;
+                grid[gridX][gridY] = { color: color, static: isStatic };
+                sandGrainCount++;
+                document.getElementById('ballCount').textContent = sandGrainCount.toLocaleString('de-DE');
+            }
+        }
+
+        function createSandGrainLine(x0, y0, x1, y1, isStatic = false) {
+            let dx = Math.abs(x1 - x0);
+            let dy = Math.abs(y1 - y0);
+            let sx = x0 < x1 ? 1 : -1;
+            let sy = y0 < y1 ? 1 : -1;
+            let err = dx - dy;
+
+            while (true) {
+                createSandGrain(x0, y0, isStatic);
+
+                if (Math.abs(x0 - x1) < 1 && Math.abs(y0 - y1) < 1) break;
+                let e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x0 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y0 += sy;
+                }
+            }
+        }
+
+        function update() {
+            if (isMouseDown) {
+                createSandGrain(mouseX, mouseY, false);
+            }
+
+            for (let step = 0; step < 2; step++) {
+                let newGrid = [];
+                for (let x = 0; x < gridWidth; x++) {
+                    newGrid[x] = [];
+                    for (let y = 0; y < gridHeight; y++) {
+                        newGrid[x][y] = null;
+                    }
+                }
+
+                for (let x = 0; x < gridWidth; x++) {
+                    for (let y = gridHeight - 1; y >= 0; y--) {
+                        if (grid[x][y] !== null) {
+                            let grain = grid[x][y];
+
+                            if (!grain.static) {
+                                let color = grain.color;
+
+                                if (y + 1 < gridHeight && grid[x][y + 1] === null) {
+                                    newGrid[x][y + 1] = { color: color, static: false };
+                                } else if (x > 0 && y + 1 < gridHeight && grid[x - 1][y + 1] === null) {
+                                    newGrid[x - 1][y + 1] = { color: color, static: false };
+                                } else if (x + 1 < gridWidth && y + 1 < gridHeight && grid[x + 1][y + 1] === null) {
+                                    newGrid[x + 1][y + 1] = { color: color, static: false };
+                                } else {
+                                    newGrid[x][y] = { color: color, static: false };
+                                }
+                            } else {
+                                newGrid[x][y] = grain;
+                            }
+                        }
+                    }
+                }
+
+                grid = newGrid;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let x = 0; x < gridWidth; x++) {
+                for (let y = 0; y < gridHeight; y++) {
+                    if (grid[x][y] !== null) {
+                        ctx.fillStyle = grid[x][y].color;
+                        ctx.fillRect(x * gridCellSize, y * gridCellSize, gridCellSize, gridCellSize);
+                    }
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        
+        
+        // Cookie-Hinweis Logik
+document.addEventListener('DOMContentLoaded', function() {
+    if (!localStorage.getItem('cookiesAccepted')) {
+        document.getElementById('cookieNotice').style.display = 'block';
+    }
+
+    document.getElementById('acceptCookies').addEventListener('click', function() {
+        localStorage.setItem('cookiesAccepted', 'true');
+        document.getElementById('cookieNotice').style.display = 'none';
+    });
+});
+
+	update();
+
+    </script>
+    <!-- Cookie-Hinweis -->
+<div id="cookieNotice" class="cookie-notice" style="display: none;">
+    <p>Diese Website verwendet Cookies, um sicherzustellen, dass Sie die beste Erfahrung auf unserer Website erzielen.</p>
+    <button id="acceptCookies">Akzeptieren</button>
+</div>
+
+</body>
+</html>
+
