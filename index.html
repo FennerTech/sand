@@ -1,5 +1,5 @@
 <!-- -----------------------------------------------
-Sand v1.15
+Sand v1.16
 (c) 2024 Marco Fenner
 
 Urheberrechtlich geschützt.
@@ -12,15 +12,15 @@ Danke und Viel Spaß!
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Sand v1.15</title>
+    <title>Sand v1.16</title>
     
-    <meta name="description" content="Sand v1.15 ist ein interaktives Kunstwerkzeug vom Datenschrauber. Erstellen Sie kreative Sandbilder mit Links- und Rechtsklick.">
+    <meta name="description" content="Sand v1.16 ist ein interaktives Kunstwerkzeug vom Datenschrauber. Erstellen Sie kreative Sandbilder mit Links- und Rechtsklick.">
     <meta name="keywords" content="Sand, Kunstwerkzeug, Datenschrauber, interaktiv, Kreativität, Sandbilder, malen, zeichnen">
     <meta name="author" content="Marco Fenner">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Open Graph Meta-Tags -->
-    <meta property="og:title" content="Sand v1.15 - Ein Kunstwerkzeug vom Datenschrauber">
-    <meta property="og:description" content="Erstellen Sie kreative Sandbilder mit dem interaktiven Kunstwerkzeug Sand v1.15.">
+    <meta property="og:title" content="Sand v1.16 - Ein Kunstwerkzeug vom Datenschrauber">
+    <meta property="og:description" content="Erstellen Sie kreative Sandbilder mit dem interaktiven Kunstwerkzeug Sand v1.16.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://fennertech.github.io/sand/">   
     <!-- Favicon -->
@@ -190,7 +190,7 @@ Danke und Viel Spaß!
     <script language="JavaScript" src="https://www.besucherzaehler-kostenlos.de/js/counter.js.php?count=1&id=fennertech.github.iosand&start=0&design=6"></script>
 
     <div id="statusWindow">
-        <h1>Sand v1.15</h1>
+        <h1>Sand v1.16</h1>
         <div id="subtitle">
             <p>Ein Kunstwerkzeug vom <a href="mailto:datenschrauber@posteo.de">Datenschrauber</a></p>
             <p>Bitte Links- und Rechtsklick verwenden ...</p>
@@ -607,6 +607,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 	update();
+	
+	// Warnung beim Verlassen der Seite
+window.addEventListener('beforeunload', function (e) {
+    if (sandGrainCount > 0) {
+        // Standardwarnung anzeigen
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
 
     </script>
     <!-- Cookie-Hinweis -->
@@ -617,4 +627,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
-
